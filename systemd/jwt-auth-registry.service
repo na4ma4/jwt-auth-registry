@@ -1,0 +1,14 @@
+[Unit]
+Description=JWT-based authentication server for Docker Registry
+BindTo=network.target
+StartLimitIntervalSec=0
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+ExecStart=/usr/bin/jwt-auth-registry-tokenprovider --watchdog
+Type=simple
+Restart=always
+RestartSec=3
+WatchdogSec=90

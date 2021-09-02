@@ -1,0 +1,20 @@
+linters:
+  enable-all: true
+  disable:
+    - exhaustivestruct
+    - golint
+    - interfacer
+    - maligned
+    - paralleltest
+    - scopelint
+
+issues:
+  exclude-use-default: false
+
+linters-settings:
+  gomnd:
+    settings:
+      mnd:
+        ignored-numbers: 2
+  govet:
+    check-shadowing: true

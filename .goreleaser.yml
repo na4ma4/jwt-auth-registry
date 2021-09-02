@@ -1,0 +1,78 @@
+env:
+  - CGO_ENABLED=0
+
+before:
+  hooks:
+    - make test
+    - go generate ./...
+    - go mod tidy
+    - go mod download
+
+builds:
+  - id: jwt-auth-registry
+    main: ./cmd/jwt-auth-registry
+    binary: jwt-auth-registry
+    flags:
+      - -tags=release
+      - -buildmode=default
+      - -trimpath
+      - -v
+    mod_timestamp: '{{ .CommitTimestamp }}'
+    goarm: [5, 7]
+    goos: ['linux', 'darwin', 'windows']
+    goarch: ['amd64', 'arm', 'arm64']
+
+archives:
+
+checksum:
+  algorithm: sha256
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{ .Tag }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+
+dockers:
+  - image_templates:
+    - "ghcr.io/na4ma4/jwt-auth-registry:{{ .Tag }}"
+    - "ghcr.io/na4ma4/jwt-auth-registry:{{ .Major }}"
+    - "ghcr.io/na4ma4/jwt-auth-registry:latest"
+    extra_files:
+    - "scripts/replace-links-in-ssl-certs.sh"
+    build_flag_templates:
+    - "--pull"
+    - "--label=org.opencontainers.image.created={{.Date}}"
+    - "--label=org.opencontainers.image.title={{.ProjectName}}"
+    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+    - "--label=org.opencontainers.image.version={{.Version}}"
+
+nfpms:
+  -
+    id: jwt-auth-registry
+    package_name: jwt-auth-registry
+    file_name_template: "jwt-auth-registry_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    builds:
+      - jwt-auth-registry
+    homepage: https://github.com/na4ma4/jwt-auth-registry
+    maintainer: na4ma4 <na4ma4@users.noreply.github.com>
+    description: JWT-based Authentication Proxy
+    formats:
+      - apk
+      - deb
+    bindir: /usr/bin
+    contents:
+      - src: "systemd/jwt-auth-registry.service"
+        dst: "/lib/systemd/system/jwt-auth-registry.service"
+    overrides:
+      deb:
+        scripts:
+          preinstall: "nfpms/pre-install.sh"
+          postinstall: "nfpms/post-install.sh"
+          preremove: "nfpms/pre-remove.sh"
+          postremove: "nfpms/post-remove.sh"
