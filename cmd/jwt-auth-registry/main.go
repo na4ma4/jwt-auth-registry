@@ -67,8 +67,11 @@ func showHelp(cmd *cobra.Command) {
 	_ = cmd.Help()
 }
 
-func verifierOrBust(cmd *cobra.Command, cfg config.Conf, logger *zap.Logger) (verifier jwt.Verifier) {
-	var err error
+func verifierOrBust(cmd *cobra.Command, cfg config.Conf, logger *zap.Logger) jwt.Verifier {
+	var (
+		verifier jwt.Verifier
+		err      error
+	)
 
 	if verifier, err = jwt.NewRSAVerifierFromFile(
 		cfg.GetStringSlice("server.auth.audience"),
@@ -79,7 +82,7 @@ func verifierOrBust(cmd *cobra.Command, cfg config.Conf, logger *zap.Logger) (ve
 		os.Exit(1)
 	}
 
-	return
+	return verifier
 }
 
 func mainCommand(cmd *cobra.Command, args []string) {

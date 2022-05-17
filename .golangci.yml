@@ -1,12 +1,16 @@
 linters:
   enable-all: true
   disable:
+    - execinquery
+    - exhaustruct
     - exhaustivestruct
     - golint
     - interfacer
+    - ireturn
     - maligned
     - paralleltest
     - scopelint
+    - varnamelen
 
 issues:
   exclude-use-default: false
@@ -15,6 +19,6 @@ linters-settings:
   gomnd:
     settings:
       mnd:
-        ignored-numbers: 2
+        ignored-numbers: "2"
   govet:
     check-shadowing: true

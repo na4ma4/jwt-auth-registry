@@ -24,12 +24,15 @@ func NewBasic(v jwt.Verifier, legacy authitem.Store) *Basic {
 
 // Authenticate tests a username and password against a legacy user set and then attempts
 // to use them as tokens, if the token is parsed but has an empty subject field, it returns an error.
-func (b *Basic) Authenticate(req *regauth.AuthorizationRequest, username, password string) (err error) {
+func (b *Basic) Authenticate(req *regauth.AuthorizationRequest, username, password string) error {
 	if b.legacy.Authenticate(username, password) {
 		return nil
 	}
 
-	var result jwt.VerifyResult
+	var (
+		result jwt.VerifyResult
+		err    error
+	)
 
 	if result, err = b.v.Verify([]byte(password)); err != nil {
 		if result, err = b.v.Verify([]byte(username)); err != nil {

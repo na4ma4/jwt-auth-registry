@@ -132,7 +132,7 @@ func (srv *AuthServer) Run(addr string) error {
 }
 
 func (srv *AuthServer) ok(w http.ResponseWriter, tk *Token) {
-	data, _ := json.Marshal(tk)
+	data, _ := json.Marshal(tk) //nolint:errchkjson
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
