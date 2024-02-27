@@ -6,6 +6,8 @@ import "strings"
 type Store map[string]*AuthItem
 
 // NewStoreFromCLI returns a new Store map from a slice of user:pass strings.
+//
+//nolint:gomnd // tokenising colon separated key:value.
 func NewStoreFromCLI(users []string) Store {
 	store := Store{}
 

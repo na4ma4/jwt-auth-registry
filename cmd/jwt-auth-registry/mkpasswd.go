@@ -11,7 +11,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-//nolint:gochecknoglobals // cobra uses globals in main
 var cmdMakePassword = &cobra.Command{
 	Use:    "mkpasswd <username> [password]",
 	Short:  "Generate a compatible hash for the legacy password",
@@ -20,18 +19,18 @@ var cmdMakePassword = &cobra.Command{
 	Hidden: true,
 }
 
-//nolint:gochecknoinits // init is used in main for cobra
 func init() {
 	rootCmd.AddCommand(cmdMakePassword)
 }
 
 // Added for future legacy support of bcrypted passwords.
+//
 //nolint:forbidigo // printing generated hash of password.
-func makePasswordCommand(cmd *cobra.Command, args []string) {
+func makePasswordCommand(_ *cobra.Command, args []string) {
 	cfg := config.NewViperConfigFromViper(viper.GetViper(), "jwt-auth-proxy")
 
 	logger, _ := cfg.ZapConfig().Build()
-	defer logger.Sync() //nolint:errcheck
+	defer logger.Sync()
 
 	var password string
 

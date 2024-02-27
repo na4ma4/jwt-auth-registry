@@ -9,10 +9,11 @@ import (
 	"time"
 
 	"github.com/docker/libtrust"
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 )
 
 // Token rep the JWT token that'll be created when authentication/authorizations succeeds.
+//
 //nolint:tagliatelle // matching docker/distribution requirements.
 type Token struct {
 	Token       string `json:"token"`
@@ -45,7 +46,7 @@ type TokenGenerator interface {
 type DefaultAuthenticator struct{}
 
 // Authenticate is the default authenticator (allows any authentication request).
-func (d *DefaultAuthenticator) Authenticate(req *AuthorizationRequest, username, password string) error {
+func (d *DefaultAuthenticator) Authenticate(_ *AuthorizationRequest, _, _ string) error {
 	return nil
 }
 
@@ -53,7 +54,7 @@ func (d *DefaultAuthenticator) Authenticate(req *AuthorizationRequest, username,
 type DefaultAuthorizer struct{}
 
 // Authorize returns the default set of abilities for an AuthorizationRequest.
-func (d *DefaultAuthorizer) Authorize(req *AuthorizationRequest) ([]string, error) {
+func (d *DefaultAuthorizer) Authorize(_ *AuthorizationRequest) ([]string, error) {
 	return []string{"pull", "push"}, nil
 }
 
@@ -93,7 +94,7 @@ func (tg *tokenGenerator) Generate(req *AuthorizationRequest, actions []string) 
 		Expiration: now + tg.tokenOpt.Expire,
 		NotBefore:  now - defaultNotBeforeLeeway,
 		IssuedAt:   now,
-		JWTID:      uuid.Must(uuid.NewV4()).String(),
+		JWTID:      uuid.New().String(),
 		Access:     []*ResourceActions{},
 	}
 	claim.Access = append(claim.Access, &ResourceActions{

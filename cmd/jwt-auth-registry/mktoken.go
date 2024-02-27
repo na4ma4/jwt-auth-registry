@@ -7,15 +7,14 @@ import (
 	"os"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/na4ma4/config"
 	pascaljwt "github.com/pascaldekloe/jwt"
-	uuid "github.com/satori/go.uuid"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
-//nolint:gochecknoglobals // cobra uses globals in main
 var cmdMakeToken = &cobra.Command{
 	Use:    "mktoken <username> [password]",
 	Short:  "Generate a token for testing",
@@ -24,7 +23,6 @@ var cmdMakeToken = &cobra.Command{
 	Hidden: true,
 }
 
-//nolint:gochecknoinits // init is used in main for cobra
 func init() {
 	cmdMakeToken.PersistentFlags().String("ca-key", "artifacts/certs/ca-key.pem", "CA private key to sign token with")
 	_ = viper.BindPFlag("server.auth-ca-key", cmdMakeToken.PersistentFlags().Lookup("ca-key"))
@@ -38,12 +36,13 @@ func init() {
 }
 
 // Added for future legacy support of bcrypted passwords.
+//
 //nolint:forbidigo,gomnd // printing generated hash of password.
-func makeTokenCommand(cmd *cobra.Command, args []string) {
+func makeTokenCommand(_ *cobra.Command, args []string) {
 	cfg := config.NewViperConfigFromViper(viper.GetViper(), "jwt-auth-proxy")
 
 	logger, _ := cfg.ZapConfig().Build()
-	defer logger.Sync() //nolint:errcheck
+	defer logger.Sync()
 
 	tokenClaims := &pascaljwt.Claims{
 		Registered: pascaljwt.Registered{
@@ -55,7 +54,7 @@ func makeTokenCommand(cmd *cobra.Command, args []string) {
 			Expires:   pascaljwt.NewNumericTime(time.Now().Add(24 * time.Hour)),
 			NotBefore: pascaljwt.NewNumericTime(time.Now()),
 			Issued:    pascaljwt.NewNumericTime(time.Now()),
-			ID:        uuid.Must(uuid.NewV4()).String(),
+			ID:        uuid.New().String(),
 		},
 		Set: map[string]interface{}{
 			"Online": true,

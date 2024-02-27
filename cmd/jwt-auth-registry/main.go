@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/na4ma4/config"
-	"github.com/na4ma4/go-httplog"
+	"github.com/na4ma4/go-zaptool"
 	"github.com/na4ma4/jwt-auth-registry/internal/authitem"
 	"github.com/na4ma4/jwt-auth-registry/internal/jwtauth"
 	"github.com/na4ma4/jwt-auth-registry/internal/mainconfig"
@@ -17,13 +18,18 @@ import (
 	"go.uber.org/zap"
 )
 
-//nolint:gochecknoglobals // cobra uses globals in main
+const (
+	defaultHTTPPort     = 80
+	defaultReadTimeout  = 10 * time.Second
+	defaultWriteTimeout = 10 * time.Second
+	defaultIdleTimeout  = 10 * time.Second
+)
+
 var rootCmd = &cobra.Command{
 	Use: "jwt-auth-registry-tokenprovider",
 	Run: mainCommand,
 }
 
-//nolint:gochecknoinits,gomnd // init is used in main for cobra
 func init() {
 	cobra.OnInitialize(mainconfig.ConfigInit)
 
@@ -35,7 +41,7 @@ func init() {
 	_ = viper.BindPFlag("server.sign.issuer", rootCmd.PersistentFlags().Lookup("issuer"))
 	_ = viper.BindEnv("server.sign.issuer", "ISSUER")
 
-	rootCmd.PersistentFlags().IntP("port", "p", 80, "HTTP Port")
+	rootCmd.PersistentFlags().IntP("port", "p", defaultHTTPPort, "HTTP Port")
 	_ = viper.BindPFlag("server.port", rootCmd.PersistentFlags().Lookup("port"))
 	_ = viper.BindEnv("server.port", "HTTP_PORT")
 
@@ -85,28 +91,28 @@ func verifierOrBust(cmd *cobra.Command, cfg config.Conf, logger *zap.Logger) jwt
 	return verifier
 }
 
-func mainCommand(cmd *cobra.Command, args []string) {
+func mainCommand(cmd *cobra.Command, _ []string) {
 	cfg := config.NewViperConfigFromViper(viper.GetViper(), "jwtauth")
 
 	logger, _ := cfg.ZapConfig().Build()
-	defer logger.Sync() //nolint:errcheck
+	defer logger.Sync()
 
 	verifier := verifierOrBust(cmd, cfg, logger)
 	legacyUsers := authitem.NewStoreFromCLI(cfg.GetStringSlice("server.legacy-users"))
 
-	rs, err := regauth.NewAuthServer(logger, &regauth.Option{
+	rs, rsErr := regauth.NewAuthServer(logger, &regauth.Option{
 		Authenticator: jwtauth.NewBasic(verifier, legacyUsers),
 		Certfile:      cfg.GetString("server.sign.cert"),
 		Keyfile:       cfg.GetString("server.sign.key"),
 		TokenIssuer:   cfg.GetString("server.sign.issuer"),
 	})
-	if err != nil {
-		logger.Panic("unable to create registry auth server", zap.Error(err))
+	if rsErr != nil {
+		logger.Panic("unable to create registry auth server", zap.Error(rsErr))
 	}
 
 	s := http.NewServeMux()
 
-	s.Handle("/", httplog.LoggingHandler(logger, rs))
+	s.Handle("/", zaptool.LoggingHTTPHandler(logger, rs))
 
 	bindAddr := fmt.Sprintf("%s:%d", cfg.GetString("server.address"), cfg.GetInt("server.port"))
 
@@ -116,7 +122,15 @@ func mainCommand(cmd *cobra.Command, args []string) {
 		zap.String("proxy-uri", cfg.GetString("server.backend-uri")),
 	)
 
-	if err := http.ListenAndServe(bindAddr, s); err != nil {
+	srv := &http.Server{
+		Addr:         bindAddr,
+		ReadTimeout:  defaultReadTimeout,
+		WriteTimeout: defaultWriteTimeout,
+		IdleTimeout:  defaultIdleTimeout,
+		Handler:      s,
+	}
+
+	if err := srv.ListenAndServe(); err != nil {
 		logger.Fatal("HTTP Server Error", zap.Error(err))
 	}
 }

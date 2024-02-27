@@ -6,11 +6,17 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"go.uber.org/zap"
 )
 
-const signAuth = "AUTH"
+const (
+	signAuth            = "AUTH"
+	defaultReadTimeout  = 10 * time.Second
+	defaultWriteTimeout = 10 * time.Second
+	defaultIdleTimeout  = 10 * time.Second
+)
 
 // AuthServer is the token authentication server.
 type AuthServer struct {
@@ -18,6 +24,8 @@ type AuthServer struct {
 	authorizer     Authorizer
 	authenticator  Authenticator
 	tokenGenerator TokenGenerator
+	httpServer     *http.Server
+	httpMux        *http.ServeMux
 }
 
 // NewAuthServer creates a new AuthServer.
@@ -40,11 +48,21 @@ func NewAuthServer(logger *zap.Logger, opt *Option) (*AuthServer, error) {
 		opt.TokenGenerator = newTokenGenerator(pb, prk, tk)
 	}
 
+	mux := http.NewServeMux()
+	srv := &http.Server{
+		ReadTimeout:  defaultReadTimeout,
+		WriteTimeout: defaultWriteTimeout,
+		IdleTimeout:  defaultIdleTimeout,
+		Handler:      mux,
+	}
+
 	return &AuthServer{
 		logger:         logger,
 		authorizer:     opt.Authorizer,
 		authenticator:  opt.Authenticator,
 		tokenGenerator: opt.TokenGenerator,
+		httpServer:     srv,
+		httpMux:        mux,
 	}, nil
 }
 
@@ -92,6 +110,7 @@ func (srv *AuthServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	srv.ok(w, tk)
 }
 
+//nolint:gomnd // segmenting request token
 func (srv *AuthServer) parseRequest(r *http.Request) *AuthorizationRequest {
 	q := r.URL.Query()
 	req := &AuthorizationRequest{
@@ -121,10 +140,12 @@ func (srv *AuthServer) parseRequest(r *http.Request) *AuthorizationRequest {
 
 // Run is the method that starts the HTTP server and blocks until it is finished.
 func (srv *AuthServer) Run(addr string) error {
-	http.Handle("/", srv)
+	srv.httpMux.Handle("/", srv)
 	// fmt.Printf("Authentication server running at %s", addr)
 
-	if err := http.ListenAndServe(addr, nil); err != nil {
+	srv.httpServer.Addr = addr
+
+	if err := srv.httpServer.ListenAndServe(); err != nil {
 		return fmt.Errorf("http server returned error: %w", err)
 	}
 
@@ -132,7 +153,7 @@ func (srv *AuthServer) Run(addr string) error {
 }
 
 func (srv *AuthServer) ok(w http.ResponseWriter, tk *Token) {
-	data, _ := json.Marshal(tk) //nolint:errchkjson
+	data, _ := json.Marshal(tk)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
