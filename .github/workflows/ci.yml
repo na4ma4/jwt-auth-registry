@@ -10,9 +10,11 @@ on:
 
 jobs:
   unit-test:
+    name: "Unit Test"
     uses: na4ma4/actions/.github/workflows/unit-test.yml@main
 
   goreleaser:
+    name: "Goreleaser"
     if: startsWith(github.ref, 'refs/tags/v')
     needs:
       - unit-test
