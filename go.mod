@@ -7,7 +7,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/manifoldco/promptui v0.9.0
 	github.com/na4ma4/config v1.0.1
-	github.com/na4ma4/go-zaptool v0.4.5
+	github.com/na4ma4/go-zaptool v0.4.8
 	github.com/na4ma4/jwt/v2 v2.1.2
 	github.com/pascaldekloe/jwt v1.12.0
 	github.com/spf13/cobra v1.8.0
