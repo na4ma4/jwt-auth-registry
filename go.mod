@@ -10,7 +10,7 @@ require (
 	github.com/na4ma4/go-zaptool v0.4.8
 	github.com/na4ma4/jwt/v2 v2.1.2
 	github.com/pascaldekloe/jwt v1.12.0
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.24.0
