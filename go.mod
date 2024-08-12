@@ -8,7 +8,7 @@ require (
 	github.com/manifoldco/promptui v0.9.0
 	github.com/na4ma4/config v1.0.1
 	github.com/na4ma4/go-zaptool v0.4.8
-	github.com/na4ma4/jwt/v2 v2.1.2
+	github.com/na4ma4/jwt/v2 v2.1.3
 	github.com/pascaldekloe/jwt v1.12.0
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
