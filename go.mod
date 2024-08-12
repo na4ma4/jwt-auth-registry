@@ -6,7 +6,7 @@ require (
 	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7
 	github.com/google/uuid v1.6.0
 	github.com/manifoldco/promptui v0.9.0
-	github.com/na4ma4/config v1.0.1
+	github.com/na4ma4/config v1.0.2
 	github.com/na4ma4/go-zaptool v0.4.8
 	github.com/na4ma4/jwt/v2 v2.1.2
 	github.com/pascaldekloe/jwt v1.12.0
