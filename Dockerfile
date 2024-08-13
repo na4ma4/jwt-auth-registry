@@ -1,4 +1,5 @@
-FROM ubuntu:bionic AS builder
+# syntax=docker/dockerfile:1
+FROM --platform=$BUILDPLATFORM ubuntu:bionic AS builder
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -11,7 +12,9 @@ RUN apt-get update && \
 COPY scripts/replace-links-in-ssl-certs.sh /
 RUN /replace-links-in-ssl-certs.sh
 
-FROM scratch
+FROM --platform=$BUILDPLATFORM scratch
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
 ARG GIT_HEAD_HASH_FULL=
 
 ENV HTTP_PORT="80" AUDIENCE="tls-web-client-auth"
