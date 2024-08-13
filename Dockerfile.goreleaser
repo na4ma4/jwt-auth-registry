@@ -16,14 +16,13 @@ ARG GIT_HEAD_HASH_FULL=
 
 ENV HTTP_PORT="80" AUDIENCE="tls-web-client-auth"
 EXPOSE 80/tcp
-ENTRYPOINT [ "/bin/jwt-auth-registry-tokenprovider" ]
 
 COPY --from=builder /etc/ssl/certs/ /etc/ssl/certs/
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 
-COPY artifacts/build/release/$TARGETPLATFORM/* /bin/
+COPY jwt-auth-registry-tokenprovider /bin/
+ENTRYPOINT [ "/bin/jwt-auth-registry-tokenprovider" ]
 
 LABEL org.opencontainers.image.source="https://github.com/na4ma4/jwt-auth-registry" \
   org.opencontainers.image.title="JWT-based authentication provider for Docker Registry" \
   org.opencontainers.image.revision="${GIT_HEAD_HASH_FULL}"
- 

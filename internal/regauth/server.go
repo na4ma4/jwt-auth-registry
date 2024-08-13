@@ -110,7 +110,7 @@ func (srv *AuthServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	srv.ok(w, tk)
 }
 
-//nolint:gomnd // segmenting request token
+//nolint:mnd // segmenting request token
 func (srv *AuthServer) parseRequest(r *http.Request) *AuthorizationRequest {
 	q := r.URL.Query()
 	req := &AuthorizationRequest{
