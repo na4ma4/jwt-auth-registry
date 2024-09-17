@@ -2,17 +2,15 @@ module github.com/na4ma4/jwt-auth-registry/magefiles
 
 go 1.22.2
 
-toolchain go1.22.2
-
 require (
-	github.com/dosquad/mage v0.1.25
+	github.com/dosquad/mage v0.1.31
 	github.com/magefile/mage v1.15.0
 )
 
 require (
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/cheggaaa/pb/v3 v3.1.5 // indirect
-	github.com/dosquad/go-cliversion v0.1.4 // indirect
+	github.com/dosquad/go-cliversion v0.1.6 // indirect
 	github.com/dosquad/go-giturl v0.1.1 // indirect
 	github.com/fatih/color v1.17.0 // indirect
 	github.com/go-resty/resty/v2 v2.14.0 // indirect
