@@ -1,6 +1,7 @@
 module github.com/na4ma4/jwt-auth-registry
 
 go 1.22.2
+toolchain go1.23.6
 
 require (
 	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7
@@ -13,7 +14,7 @@ require (
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.19.0
 	go.uber.org/zap v1.27.0
-	golang.org/x/crypto v0.33.0
+	golang.org/x/crypto v0.34.0
 )
 
 require (
