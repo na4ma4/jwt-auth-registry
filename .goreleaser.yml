@@ -86,7 +86,7 @@ nfpms:
     id: jwt-auth-registry
     package_name: jwt-auth-registry
     file_name_template: "jwt-auth-registry_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}{{ if .Mips }}_{{ .Mips }}{{ end }}"
-    builds:
+    ids:
       - jwt-auth-registry
     homepage: https://github.com/na4ma4/jwt-auth-registry
     maintainer: na4ma4 <na4ma4@users.noreply.github.com>
